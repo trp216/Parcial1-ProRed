@@ -1,0 +1,89 @@
+package view;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import control.PlayerController;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import model.Card;
+
+public class PlayerWindow extends Stage {
+
+	// UI Elements
+	private Scene scene;
+	private PlayerController control;
+	
+	private Button takeCardButton;
+	private Button stand;
+	private Label status;
+	
+	//cartas en el fxml
+	private Label card1;
+	private Label card2;
+	private Label card3;
+	private Label card4;
+	private Label card5;
+	
+	
+	
+
+	public PlayerWindow() {
+
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("PlayerWindow.fxml"));
+			Parent parent = loader.load();
+
+			scene = new Scene(parent, 477, 422);
+			this.setScene(scene);
+
+			control = new PlayerController(this);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public Button getTakeCardButton() {
+		return takeCardButton;
+	}
+
+	public Button getStand() {
+		return stand;
+	}
+
+	public Label getStatus() {
+		return status;
+	}
+
+	public void setStatus(String string) {
+		// TODO Auto-generated method stub
+		status.setText(string);
+	}
+	
+	public void setBaseCards(Card c) {
+		if(card1.getText().equals("None")) {
+			card1.setText(c.getValue()+""+c.getFigure());
+		}else {
+			if(card2.getText().equals("None")) {
+				card2.setText(c.getValue()+""+c.getFigure());
+			}
+		}
+		
+		
+	}
+
+	public void startGame() {
+		card1.setText("None");
+		card2.setText("None");
+		card3.setText("None");
+		card4.setText("None");
+		card5.setText("None");
+	}
+
+}

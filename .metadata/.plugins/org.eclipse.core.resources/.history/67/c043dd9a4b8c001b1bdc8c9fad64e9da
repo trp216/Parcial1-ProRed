@@ -1,0 +1,26 @@
+package model;
+
+public class Draw {
+
+	private String type = "Draw";
+	
+	private String id;
+	
+	public Draw() {}
+
+	public Draw(String id) {
+		super();
+		this.id = id;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	
+	
+}

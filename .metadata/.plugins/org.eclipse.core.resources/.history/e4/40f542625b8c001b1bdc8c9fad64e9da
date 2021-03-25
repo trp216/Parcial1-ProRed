@@ -1,0 +1,12 @@
+package model;
+
+public class Hit {
+
+	private String type = "Draw";
+	
+	
+	public Hit() {}
+
+	
+	
+}

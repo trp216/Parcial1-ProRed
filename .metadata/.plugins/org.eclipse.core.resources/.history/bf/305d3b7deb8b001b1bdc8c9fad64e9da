@@ -1,0 +1,13 @@
+package model;
+
+public class Card {
+	
+	private String type = "Card";
+	
+	private int value;
+	
+	private String figure;
+	
+	
+
+}

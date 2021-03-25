@@ -1,0 +1,11 @@
+package model;
+
+public class Status {
+	
+	private String type = "Status";
+	
+	public Status() {}
+	
+	
+
+}

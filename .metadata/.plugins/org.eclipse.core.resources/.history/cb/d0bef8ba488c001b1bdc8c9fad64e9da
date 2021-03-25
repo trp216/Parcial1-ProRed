@@ -1,0 +1,9 @@
+package model;
+
+public class Draw {
+
+	private String type = "Draw";
+	
+	public Draw() {}
+	
+}

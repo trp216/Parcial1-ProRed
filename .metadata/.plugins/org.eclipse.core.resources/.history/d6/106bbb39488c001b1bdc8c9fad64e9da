@@ -1,0 +1,12 @@
+package model;
+
+public class Stand {
+	
+	private String type = "Stand";
+	
+	private String id;
+	
+	public Stand() {}
+	
+
+}
