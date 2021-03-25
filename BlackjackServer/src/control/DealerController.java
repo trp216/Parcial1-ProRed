@@ -115,7 +115,7 @@ public class DealerController implements OnMessageListener, OnConnectionListener
 			}
 			else {
 				standP2 = true;
-				s.getScore();
+				scoreP2 = s.getScore();
 				gameOver(s);
 			}
 			break;
@@ -126,23 +126,96 @@ public class DealerController implements OnMessageListener, OnConnectionListener
 		
 	}
 
-	public void gameOver(Stand s) {
-		String msg = "Game Over. \n";
-		msg+= s.getId() + " score: " + s.getScore() +"\n";
+	public void gameOver(Stand s) {		
+		
+		Status toSend = new Status();
+		
+		int dif1 = Math.abs(21-scoreP1);
+		int dif2 = Math.abs(21-scoreP2);
+		
 		if(s.getId().equals(idClient1)) {
-			msg+= idClient2 +" score: ";
+			
+			if(s.getScore()==scoreP1) {
+				if(dif1<dif2) {
+					toSend.setWinner(s.getId());
+					toSend.setScoreWinner(scoreP1);
+					toSend.setLoser(idClient2);
+					toSend.setScoreLoser(scoreP2);
+				}else { //dif1 > dif2
+					toSend.setWinner(idClient2);
+					toSend.setScoreWinner(scoreP2);
+					toSend.setLoser(idClient1);
+					toSend.setScoreLoser(scoreP1);
+				}
+			}
+			else { //s.getScore() == scoreP2
+				if(dif2<dif1) {
+					toSend.setWinner(s.getId());
+					toSend.setScoreWinner(scoreP2);
+					toSend.setLoser(idClient2);
+					toSend.setScoreLoser(scoreP1);
+				}else { //dif2 > dif1
+					toSend.setWinner(idClient2);
+					toSend.setScoreWinner(scoreP1);
+					toSend.setLoser(idClient1);
+					toSend.setScoreLoser(scoreP2);
+				}
+			}
+			
 		}
-		else {
-			msg+= idClient1 +" score: ";
+		else { //s.getID() == idClient2
+			
+			if(s.getScore()==scoreP1) {
+				if(dif1<dif2) {
+					toSend.setWinner(s.getId());
+					toSend.setScoreWinner(scoreP1);
+					toSend.setLoser(idClient1);
+					toSend.setScoreLoser(scoreP2);
+				}else if(dif1 == dif2) {
+					toSend.setEmpate(true);
+					
+				}else { //dif1 >dif2
+					toSend.setWinner(idClient1);
+					toSend.setScoreWinner(scoreP2);
+					toSend.setLoser(idClient2);
+					toSend.setScoreLoser(scoreP1);
+				}
+			}
+			else { //s.getScore() == scoreP2
+				if(dif2<dif1) {
+					toSend.setWinner(s.getId());
+					toSend.setScoreWinner(scoreP2);
+					toSend.setLoser(idClient1);
+					toSend.setScoreLoser(scoreP1);
+				}else if(dif1 == dif2) {
+					toSend.setEmpate(true);
+					
+				}else { //dif2 >dif1
+					toSend.setWinner(idClient1);
+					toSend.setScoreWinner(scoreP1);
+					toSend.setLoser(idClient2);
+					toSend.setScoreLoser(scoreP2);
+				}
+			}
+			
 		}
 		
-		if(s.getScore()==scoreP1) {
-			msg+= scoreP2;
-		}
-		else {
-			msg+= scoreP1;
-		}
-		Status toSend = new Status(msg);
+		
+//		msg+= s.getId() + " score: " + s.getScore() +"\n";
+//		if(s.getId().equals(idClient1)) {
+//			msg+= idClient2 +" score: ";
+//		}
+//		else {
+//			msg+= idClient1 +" score: ";
+//		}
+//		
+//		if(s.getScore()==scoreP1) {
+//			msg+= scoreP2;
+//		}
+//		else {
+//			msg+= scoreP1;
+//		}
+		
 		Gson gson = new Gson();
 		String json = gson.toJson(toSend);
 		connection.sendBroadcast(json);

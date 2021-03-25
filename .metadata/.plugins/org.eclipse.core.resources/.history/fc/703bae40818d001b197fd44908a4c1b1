@@ -1,0 +1,208 @@
+package control;
+
+import comm.Receptor.OnMessageListener;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.UUID;
+
+import com.google.gson.Gson;
+
+import comm.TCPConnection;
+import comm.TCPConnection.OnConnectionListener;
+import javafx.application.Platform;
+import model.Card;
+import model.Generic;
+import model.Hit;
+import model.Identification;
+import model.Stand;
+import model.Status;
+import view.DealerWindow;
+
+public class DealerController implements OnMessageListener, OnConnectionListener{
+	
+	private DealerWindow view;
+	private TCPConnection connection;
+	
+	private ArrayList<Card> dealerCards;
+	
+	private boolean standP1 = false;
+	private boolean standP2 = false;
+	
+	private int scoreP1;
+	private int scoreP2;
+	
+	private String idClient1 = "";
+	private String idClient2 = "";
+	
+	public DealerController(DealerWindow view) {
+		this.view = view;
+		init();
+	}
+	
+	public void init() {
+		connection = TCPConnection.getInstance();
+		connection.setPuerto(5000);
+		connection.start();
+		connection.setConnectionListener(this);
+		connection.setMessageListener(this);
+		
+		dealerCards = new ArrayList<Card>();
+		initializeDeck();
+	}
+	
+	public void initializeDeck() {
+		for(int i =1;i<=10;i++) {
+			Card cD = new Card(i, 'D');
+			Card cT = new Card(i, 'T');
+			Card cP = new Card(i, 'P');
+			Card cC = new Card(i, 'C');
+			dealerCards.add(cD);
+			dealerCards.add(cT);
+			dealerCards.add(cP);
+			dealerCards.add(cC);
+		}
+		createLetterCards('D');
+		createLetterCards('T');
+		createLetterCards('P');
+		createLetterCards('C');
+	}
+	
+	private void createLetterCards(char figure) {
+		for(int i = 0;i<4;i++) {
+			Card c = new Card(11, figure);
+			dealerCards.add(c);
+		}
+	}
+	
+	@Override
+	public void onConnection(String id) {
+			Platform.runLater(	
+				()->{
+					for(int i = 0;i<2;i++) {
+						sendCard(id);
+					}
+				}
+				
+			);
+		System.out.println("Nuevo jugador: " + id);
+	}
+	
+	
+
+	@Override
+	public void OnMessage(String msg) {
+		Gson gson = new Gson();
+		Generic type = gson.fromJson(msg, Generic.class);
+		
+		switch (type.getType()) {
+		case "Hit":
+			//ME HAN PEDIDO UNA CARTA
+			System.out.println("Me han pedido una carta");
+			Hit h = gson.fromJson(msg, Hit.class);
+			if(idClient1.isEmpty()==true) {
+				idClient1 = h.getId();
+			}else if(idClient1.isEmpty()==false && idClient2.isEmpty()==true){
+				idClient2 = h.getId();
+			}
+			sendCard(h.getId());
+			break;
+		case "Stand":
+			Stand s = gson.fromJson(msg, Stand.class);
+			if(standP1==false) {
+				standP1 = true;
+				scoreP1 = s.getScore();
+			}
+			else {
+				standP2 = true;
+				s.getScore();
+				gameOver(s);
+			}
+			break;
+		case "Status":
+			//Gano? Pierdo? Empato?
+			break;
+		}
+		
+	}
+
+	public void gameOver(Stand s) {
+		String msg = "Game Over. \n";
+		
+		Status toSend = new Status(msg);
+		
+		int dif1 = Math.abs(21-scoreP1);
+		int dif2 = Math.abs(21-scoreP2);
+		
+		if(s.getId().equals(idClient1)) {
+			
+			if(s.getScore()==scoreP1) {
+				if(dif1<dif2) {
+					toSend.setWinner(s.getId());
+					toSend.setScoreWinner(scoreP1);
+					toSend.setLoser(idClient2);
+					toSend.setScoreLoser(scoreP2);
+				}else { //dif1 > dif2
+					toSend.setWinner(idClient2);
+					toSend.setScoreWinner(scoreP2);
+					toSend.setLoser(idClient1);
+					toSend.setScoreLoser(scoreP1);
+				}
+			}
+			
+		}
+		else { //s.getID() == idClient2
+			
+			if(s.getScore()==scoreP1) {
+				if(dif1<dif2) {
+					toSend.setWinner(s.getId());
+					toSend.setScoreWinner(scoreP1);
+					toSend.setLoser(idClient1);
+					toSend.setScoreLoser(scoreP2);
+				}else { //dif1 >dif2
+					toSend.setWinner(idClient1);
+					toSend.setScoreWinner(scoreP2);
+					toSend.setLoser(idClient1);
+					toSend.setScoreLoser(scoreP1);
+				}
+			}
+			
+		}
+		
+		
+//		msg+= s.getId() + " score: " + s.getScore() +"\n";
+//		if(s.getId().equals(idClient1)) {
+//			msg+= idClient2 +" score: ";
+//		}
+//		else {
+//			msg+= idClient1 +" score: ";
+//		}
+//		
+//		if(s.getScore()==scoreP1) {
+//			msg+= scoreP2;
+//		}
+//		else {
+//			msg+= scoreP1;
+//		}
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(toSend);
+		connection.sendBroadcast(json);
+	}
+
+	//RECUERDA MANDAR DOS CARTAS INICALES A CADA JUGADOR
+	private Card hitCard() {
+		int random = (int) (Math.random()*dealerCards.size());
+		Card toSend = dealerCards.get(random);
+		dealerCards.remove(random);
+		return toSend;
+	}
+	
+	public void sendCard(String id) {
+		Card toSend = hitCard();
+		Gson gson = new Gson();
+		String json = gson.toJson(toSend);
+		connection.sendDirectMessage(id, json);
+	}
+
+}

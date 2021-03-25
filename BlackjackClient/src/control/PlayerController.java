@@ -94,15 +94,21 @@ public class PlayerController implements TCPConnection.OnConnectionListener, OnM
 		case "Status":
 			//Gano? Pierdo? Empato?
 			Status st = gson.fromJson(msg, Status.class);
+			if(st.getMsg()!=null) {
+				Platform.runLater(	
+						()->{
 
-			Platform.runLater(	
-					()->{
-						view.setStatus(st.getMsg());
-					}
+							view.setStatus(st.getMsg());
 
-					);
+						}
 
-
+						);
+			}
+			else {
+				endOfGame(st);
+			}
+			
+			
 			//System.out.println(st.getMsg());
 			break;
 		}
@@ -132,7 +138,7 @@ public class PlayerController implements TCPConnection.OnConnectionListener, OnM
 				()->{
 					view.setCard(c);
 
-					view.setStatus("Es el turno de tu oponente...");
+					view.setStatus("Partida en curso");
 
 				}
 
@@ -151,6 +157,26 @@ public class PlayerController implements TCPConnection.OnConnectionListener, OnM
 		connection.getEmisor().sendMessage(json);
 	}
 
+	//solo de recepcion
+	public void endOfGame(Status s) {
+		Platform.runLater(	
+				()->{
+					String msg = "";
+					if(s.isEmpate()==true) {
+						msg = "Ha habido un empate";
+					}else if(s.getWinner().equals(myID.getId())) {
+						msg = "Ganaste!! Tu puntaje: " + s.getScoreWinner() + " \n";
+						msg+= "El puntaje de tu oponente: " + s.getScoreLoser();
+					}
+					else {
+						msg = "Perdiste!! Tu puntaje: " + s.getScoreLoser() + "\n";
+						msg += "El puntaje de tu oponente: " + s.getScoreWinner();
+					}
+					view.setStatus(msg);
+				}
+
+				);
+	}
 
 
 }

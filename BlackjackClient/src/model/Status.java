@@ -4,6 +4,12 @@ public class Status {
 	
 	private String type = "Status";
 	
+	private String winner;
+	private int scoreWinner;
+	private String loser;
+	private int scoreLoser;
+	private boolean empate;
+	
 	private String msg;
 	
 	public Status() {}
@@ -19,6 +25,46 @@ public class Status {
 
 	public void setMsg(String msg) {
 		this.msg = msg;
+	}
+
+	public String getWinner() {
+		return winner;
+	}
+
+	public void setWinner(String winner) {
+		this.winner = winner;
+	}
+
+	public int getScoreWinner() {
+		return scoreWinner;
+	}
+
+	public void setScoreWinner(int scoreWinner) {
+		this.scoreWinner = scoreWinner;
+	}
+
+	public String getLoser() {
+		return loser;
+	}
+
+	public void setLoser(String loser) {
+		this.loser = loser;
+	}
+
+	public int getScoreLoser() {
+		return scoreLoser;
+	}
+
+	public void setScoreLoser(int scoreLoser) {
+		this.scoreLoser = scoreLoser;
+	}
+
+	public boolean isEmpate() {
+		return empate;
+	}
+
+	public void setEmpate(boolean empate) {
+		this.empate = empate;
 	}
 	
 	
