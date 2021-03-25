@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 
 import comm.Receptor.OnMessageListener;
 import model.Identification;
+import model.Status;
 
 public class TCPConnection extends Thread{
 
@@ -27,26 +28,26 @@ public class TCPConnection extends Thread{
 		}
 		return instance;
 	}
-	
-	
+
+
 	//GLOBAL
 	private int puerto;
 	private OnConnectionListener connectionListener;
 	private OnMessageListener messageListener;
 	private ServerSocket server;
 	private ArrayList<Session> sessions;
-	
-	
-	
+
+
+
 	public void setPuerto(int puerto) {
 		this.puerto = puerto;
 	}
-	
+
 	@Override
 	public void run() {
 		try {
 			server = new ServerSocket(puerto);
-			
+
 			while(true) {
 				System.out.println("Esperando en el puerto " + puerto);
 				Socket socket = server.accept();
@@ -54,25 +55,35 @@ public class TCPConnection extends Thread{
 				String id = UUID.randomUUID().toString();
 				Session session = new Session(id, socket);
 				connectionListener.onConnection(id);
-				sessions.add(session);
+
+				if(sessions.size()<2) {
+					sessions.add(session);
+				}
 				setAllMessageListener(messageListener);
+				
+				if(sessions.size()>1) {
+					Status toSend = new Status("Conectado");
+					Gson gson = new Gson();
+					String json = gson.toJson(toSend);
+					sendBroadcast(json);
+				}
 			}
-			
-			
-			
+
+
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
+
+
+
 	public void setAllMessageListener(OnMessageListener listener) {
 		for(int i=0 ; i<sessions.size() ; i++) {
 			Session s = sessions.get(i);
 			s.getReceptor().setListener(listener);
-			
+
 			//experimental
 			Identification idt = new Identification(s.getId());
 			Gson gson  = new Gson();
@@ -80,32 +91,32 @@ public class TCPConnection extends Thread{
 			s.getEmisor().sendMessage(json);
 		}		
 	}
-	
+
 	public void setConnectionListener(OnConnectionListener connectionListener) {
 		this.connectionListener = connectionListener;
 	}
-	
-	
-	
-	
+
+
+
+
 	public interface OnConnectionListener{
 		public void onConnection(String id);
 	}
-	
+
 	public void setMessageListener(OnMessageListener messageListener) {
 		this.messageListener = messageListener;
 	}
-	
-	
+
+
 	public void sendBroadcast(String msg) {
-		
+
 		for(int i=0 ; i < sessions.size() ; i++) {
 			Session s = sessions.get(i);
 			s.getEmisor().sendMessage(msg);
 		}
-		
+
 	}
-	
+
 	public void sendDirectMessage(String id, String msg) {
 		System.out.println("entro al direct message");
 		System.out.println("Sessions size: "+sessions.size());
@@ -117,7 +128,7 @@ public class TCPConnection extends Thread{
 			}
 		}
 	}
-	
+
 
 
 }
