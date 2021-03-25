@@ -79,9 +79,7 @@ public class DealerController implements OnMessageListener, OnConnectionListener
 	public void onConnection(String id) {
 			Platform.runLater(	
 				()->{
-					for(int i = 0;i<2;i++) {
-						sendCard(id);
-					}
+					
 				}
 				
 			);

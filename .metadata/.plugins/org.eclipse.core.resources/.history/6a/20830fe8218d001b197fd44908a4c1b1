@@ -77,14 +77,12 @@ public class DealerController implements OnMessageListener, OnConnectionListener
 	
 	@Override
 	public void onConnection(String id) {
-			Platform.runLater(	
-				()->{
-					for(int i = 0;i<2;i++) {
-						sendCard(id);
-					}
-				}
-				
-			);
+//			Platform.runLater(	
+//				()->{
+//					
+//				}
+//				
+//			);
 		System.out.println("Nuevo jugador: " + id);
 	}
 	
